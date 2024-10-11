@@ -36,10 +36,11 @@ struct Metrics {
     // general
     static constexpr int ArrowSize = 10;
     static constexpr int SmallArrowSize = 5;
+    static constexpr int BaseRadius = 0;
 
     // frames
     static constexpr int Frame_FrameWidth = 2;
-    static constexpr int Frame_FrameRadius = 5;
+    static constexpr int Frame_FrameRadius = 0;
 
     // layout
     static constexpr int Layout_TopLevelMarginWidth = 10;

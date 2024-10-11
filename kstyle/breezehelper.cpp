@@ -401,7 +401,7 @@ void Helper::renderFocusRect(QPainter *painter, const QRectF &rect, const QColor
 
         QRectF copy(strokedRect(rect));
 
-        const qreal radius(frameRadius(PenWidth::Frame));
+        const qreal radius(frameRadius(PenWidth::NoPen));
         if (!(sides & SideTop)) {
             copy.adjust(0, -radius, 0, 0);
         }
@@ -555,7 +555,7 @@ void Helper::renderSidePanelFrame(QPainter *painter, const QRectF &rect, const Q
         break;
 
     case AllSides: {
-        const qreal radius(frameRadius(PenWidth::Frame));
+        const qreal radius(frameRadius(PenWidth::NoPen));
         painter->drawRoundedRect(frameRect, radius, radius);
         break;
     }
@@ -585,7 +585,7 @@ void Helper::renderMenuFrame(QPainter *painter, const QRectF &rect, const QColor
         painter->setRenderHint(QPainter::Antialiasing);
         QRectF frameRect(rect);
 
-        qreal radius(Metrics::Frame_FrameRadius);
+        qreal radius(Metrics::BaseRadius);
 
         frameRect.adjust( //
             seamlessEdges.testFlag(Qt::LeftEdge) ? -radius : 0,
@@ -643,7 +643,7 @@ QRegion Helper::menuFrameRegion(const QMenu *widget)
     if (roundCorners) {
         QRectF frameRect(widget->rect());
 
-        qreal radius(Metrics::Frame_FrameRadius);
+        qreal radius(Metrics::BaseRadius);
 
         frameRect.adjust( //
             seamlessEdges.testFlag(Qt::LeftEdge) ? -radius : 0,
@@ -688,7 +688,7 @@ void Helper::renderButtonFrame(QPainter *painter,
 
     QRectF shadowedRect = this->shadowedRect(rect);
     QRectF frameRect = strokedRect(shadowedRect);
-    qreal radius = frameRadius(PenWidth::Frame);
+    qreal radius = frameRadius(PenWidth::NoPen);
     // setting color group to work around KColorScheme feature
     const QColor &highlightColor = palette.color(!enabled ? QPalette::Disabled : QPalette::Active, QPalette::Highlight);
     QBrush bgBrush;
@@ -763,7 +763,7 @@ void Helper::renderToolBoxFrame(QPainter *painter, const QRectF &rect, int tabWi
     }
 
     // round radius
-    const qreal radius(frameRadius(PenWidth::Frame));
+    const qreal radius(Metrics::BaseRadius);
     const QSizeF cornerSize(2 * radius, 2 * radius);
 
     // if rect - tabwidth is even, need to increase tabWidth by 1 unit
@@ -1127,7 +1127,7 @@ void Helper::renderSliderGroove(QPainter *painter, const QRectF &rect, const QCo
 
     QRectF baseRect(rect);
     baseRect.adjust(0.5, 0.5, -0.5, -0.5);
-    const qreal radius(0.5 * Metrics::Slider_GrooveThickness);
+    const qreal radius(Metrics::BaseRadius);
 
     // content
     // content
@@ -1250,7 +1250,7 @@ void Helper::renderProgressBarGroove(QPainter *painter, const QRectF &rect, cons
 
     QRectF baseRect(rect);
     baseRect.adjust(0.5, 0.5, -0.5, -0.5);
-    const qreal radius(0.5 * Metrics::ProgressBar_Thickness);
+    const qreal radius(Metrics::BaseRadius);
 
     // content
     if (fg.isValid()) {
@@ -1273,7 +1273,7 @@ void Helper::renderProgressBarBusyContents(QPainter *painter,
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     const QRectF baseRect(rect);
-    const qreal radius(0.5 * Metrics::ProgressBar_Thickness);
+    const qreal radius(Metrics::BaseRadius);
 
     // setup brush
     QPixmap pixmap(horizontal ? 2 * Metrics::ProgressBar_BusyIndicatorSize : 1, horizontal ? 1 : 2 * Metrics::ProgressBar_BusyIndicatorSize);
@@ -1319,7 +1319,7 @@ void Helper::renderScrollBarHandle(QPainter *painter, const QRectF &rect, const 
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     const QRectF baseRect(rect);
-    const qreal radius(0.5 * std::min({baseRect.width(), baseRect.height(), (qreal)Metrics::ScrollBar_SliderWidth}));
+    const qreal radius(Metrics::BaseRadius);
 
     painter->setPen(Qt::NoPen);
     painter->setPen(QPen(transparentize(fg, Metrics::Bias_Default), 1.001));
