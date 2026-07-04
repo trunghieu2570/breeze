@@ -1,4 +1,4 @@
-add_definitions(-DTRANSLATION_DOMAIN="breeze_kwin_deco")
+add_definitions(-DTRANSLATION_DOMAIN="coldly_kwin_deco")
 
 ################# includes #################
 include_directories(${CMAKE_SOURCE_DIR}/libbreezecommon)
@@ -20,7 +20,7 @@ add_library(breezedecoration MODULE
     ${breezedecoration_config_PART_FORMS_HEADERS})
 
 set_target_properties(breezedecoration PROPERTIES
-    OUTPUT_NAME org.kde.breeze
+    OUTPUT_NAME org.kde.coldly
 )
 
 target_link_libraries(breezedecoration

@@ -70,7 +70,7 @@ void StyleConfig::save()
 #if HAVE_QTDBUS
     // emit dbus signal
     QDBusMessage message(
-        QDBusMessage::createSignal(QStringLiteral("/BreezeStyle"), QStringLiteral("org.kde.Breeze.Style"), QStringLiteral("reparseConfiguration")));
+        QDBusMessage::createSignal(QStringLiteral("/ColdlyStyle"), QStringLiteral("org.kde.Coldly.Style"), QStringLiteral("reparseConfiguration")));
     QDBusConnection::sessionBus().send(message);
 #endif
 }

@@ -276,15 +276,15 @@ Style::Style()
     // use DBus connection to update on breeze configuration change
     auto dbus = QDBusConnection::sessionBus();
     dbus.connect(QString(),
-                 QStringLiteral("/BreezeStyle"),
-                 QStringLiteral("org.kde.Breeze.Style"),
+                 QStringLiteral("/ColdlyStyle"),
+                 QStringLiteral("org.kde.Coldly.Style"),
                  QStringLiteral("reparseConfiguration"),
                  this,
                  SLOT(configurationChanged()));
 
     dbus.connect(QString(),
-                 QStringLiteral("/BreezeDecoration"),
-                 QStringLiteral("org.kde.Breeze.Style"),
+                 QStringLiteral("/ColdlyDecoration"),
+                 QStringLiteral("org.kde.Coldly.Style"),
                  QStringLiteral("reparseConfiguration"),
                  this,
                  SLOT(configurationChanged()));

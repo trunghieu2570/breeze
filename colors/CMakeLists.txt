@@ -1,6 +1,6 @@
-install(FILES BreezeClassic.colors
+install(FILES ColdlyClassic.colors
         DESTINATION ${KDE_INSTALL_DATADIR}/color-schemes/)
-install(FILES BreezeDark.colors
+install(FILES ColdlyDark.colors
         DESTINATION ${KDE_INSTALL_DATADIR}/color-schemes/)
-install(FILES BreezeLight.colors
+install(FILES ColdlyLight.colors
         DESTINATION ${KDE_INSTALL_DATADIR}/color-schemes/)

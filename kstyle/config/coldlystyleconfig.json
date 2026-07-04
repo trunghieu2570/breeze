@@ -1,0 +1,13 @@
+{
+    "KPlugin": {
+        "Description": "Modify the appearance of widgets",
+        "Icon": "preferences-desktop-theme",
+        "Name": "Coldly Widget Style",
+        "ServiceTypes": [
+            "KCModule"
+        ]
+    },
+    "X-KDE-Keywords": "coldly,widget,style",
+    "X-KDE-ParentApp": "kcontrol",
+    "X-KDE-System-Settings-Parent-Category": "themes"
+}

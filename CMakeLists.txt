@@ -38,7 +38,7 @@ include(GtkUpdateIconCache)
 
 option(BUILD_QT5 "Build Qt5 style" ON)
 option(BUILD_QT6 "Build with Qt6" ON)
-option(BUILD_CURSOR "Build Breeze Cursor" ON)
+option(BUILD_CURSOR "Build Breeze Cursor" OFF)
 option(BUILD_WITH_QTQUICK "Build with Qt Quick features enabled" ON)
 
 set(QT_NO_CREATE_VERSIONLESS_TARGETS ON)
@@ -113,7 +113,7 @@ function(build_Qt6)
         set(HAVE_QTDBUS ${Qt6DBus_FOUND})
 
         option(WITH_DECORATIONS "Build Breeze window decorations for KWin" ON)
-        option(WITH_WALLPAPERS "Install Breeze default wallpapers" ON)
+        option(WITH_WALLPAPERS "Install Coldly default wallpapers" OFF)
 
         find_package(KF6FrameworkIntegration ${KF6_MIN_VERSION} CONFIG )
         set_package_properties(KF${QT_MAJOR_VERSION}FrameworkIntegration PROPERTIES
@@ -163,21 +163,22 @@ function(build_Qt6)
         add_subdirectory(wallpapers)
     endif()
 
-    ki18n_install(po)
+    # Skip installing translations to avoid overwriting Breeze .mo files.
+    # ki18n_install(po)
 
     # create a Config.cmake and a ConfigVersion.cmake file and install them
     include(ECMSetupVersion)
     ecm_setup_version(${PROJECT_VERSION} VARIABLE_PREFIX BREEZE
         PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/BreezeConfigVersion.cmake"
     )
-    set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/Breeze")
+    set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/Coldly")
 
     configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/BreezeConfig.cmake.in"
-                                  "${CMAKE_CURRENT_BINARY_DIR}/BreezeConfig.cmake"
+                                  "${CMAKE_CURRENT_BINARY_DIR}/ColdlyConfig.cmake"
                                   PATH_VARS KDE_INSTALL_FULL_DATADIR
                                   INSTALL_DESTINATION  ${CMAKECONFIG_INSTALL_DIR}
     )
-    install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/BreezeConfig.cmake"
+    install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/ColdlyConfig.cmake"
                    "${CMAKE_CURRENT_BINARY_DIR}/BreezeConfigVersion.cmake"
             DESTINATION "${CMAKECONFIG_INSTALL_DIR}"
             COMPONENT Devel
