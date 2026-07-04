@@ -1273,16 +1273,14 @@ void Helper::renderProgressBarBusyContents(QPainter *painter,
 //______________________________________________________________________________
 void Helper::renderScrollBarHandle(QPainter *painter, const QRectF &rect, const QColor &fg, const QColor &bg) const
 {
-    // setup painter
-    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setRenderHint(QPainter::Antialiasing, false);
 
     const QRectF baseRect(rect);
-    const qreal radius(0.5 * std::min({baseRect.width(), baseRect.height(), (qreal)Metrics::ScrollBar_SliderWidth}));
 
     painter->setPen(Qt::NoPen);
     painter->setPen(QPen(transparentize(fg, frameIntensityBias()), 1.001));
     painter->setBrush(KColorUtils::overlayColors(bg, alphaColor(fg, 0.5)));
-    painter->drawRoundedRect(strokedRect(baseRect), radius, radius);
+    painter->drawRect(strokedRect(baseRect));
 }
 
 //______________________________________________________________________________

@@ -94,10 +94,12 @@ struct Metrics {
     static constexpr int MenuBarItem_MarginHeight = 6;
 
     // scrollbars
-    static constexpr int ScrollBar_Extend = 21;
-    static constexpr int ScrollBar_SliderWidth = 8;
-    static constexpr int ScrollBar_MinSliderHeight = 20;
-    static constexpr int ScrollBar_NoButtonHeight = 3;
+    static constexpr int ScrollBar_NoButtonHeight = 1;
+    static constexpr int ScrollBar_Extend = 8;
+    static constexpr int ScrollBar_TrackThickness = 3;
+    static constexpr int ScrollBar_SliderOvershoot = 2;
+    static constexpr int ScrollBar_SliderWidth = ScrollBar_TrackThickness + ScrollBar_SliderOvershoot;
+    static constexpr int ScrollBar_MinSliderHeight = 14;
     static constexpr int ScrollBar_SingleButtonHeight = ScrollBar_Extend;
     static constexpr int ScrollBar_DoubleButtonHeight = 2 * ScrollBar_Extend;
 
