@@ -84,6 +84,18 @@ public:
         return _viewNeutralTextBrush.brush(palette).color();
     }
 
+    //* active text color (semantic emphasis, e.g. tab indicator)
+    QColor activeTextColor(const QPalette &palette) const
+    {
+        return _viewActiveTextBrush.brush(palette).color();
+    }
+
+    //* inactive text color (muted labels)
+    QColor inactiveTextColor(const QPalette &palette) const
+    {
+        return _viewInactiveTextBrush.brush(palette).color();
+    }
+
     //* shadow
     QColor shadowColor([[maybe_unused]] const QPalette &palette, qreal opacity = 0.125) const
     {
@@ -393,6 +405,8 @@ private:
     KStatefulBrush _viewHoverBrush;
     KStatefulBrush _viewNegativeTextBrush;
     KStatefulBrush _viewNeutralTextBrush;
+    KStatefulBrush _viewActiveTextBrush;
+    KStatefulBrush _viewInactiveTextBrush;
     //@}
 
     //*@name windeco colors

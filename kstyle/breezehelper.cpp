@@ -90,6 +90,8 @@ void Helper::loadConfig()
     _viewHoverBrush = KStatefulBrush(KColorScheme::View, KColorScheme::HoverColor);
     _viewNegativeTextBrush = KStatefulBrush(KColorScheme::View, KColorScheme::NegativeText);
     _viewNeutralTextBrush = KStatefulBrush(KColorScheme::View, KColorScheme::NeutralText);
+    _viewActiveTextBrush = KStatefulBrush(KColorScheme::View, KColorScheme::ActiveText);
+    _viewInactiveTextBrush = KStatefulBrush(KColorScheme::View, KColorScheme::InactiveText);
 
     const QPalette palette(QApplication::palette());
     _config->reparseConfiguration();
@@ -183,8 +185,8 @@ QColor Helper::hoverOutlineColor(const QPalette &palette) const
 //____________________________________________________________________
 QColor Helper::sidePanelOutlineColor(const QPalette &palette, bool hasFocus, qreal opacity, AnimationMode mode) const
 {
-    QColor outline(palette.color(QPalette::Inactive, QPalette::Highlight));
-    const QColor &focus = palette.color(QPalette::Active, QPalette::Highlight);
+    QColor outline(KColorUtils::mix(palette.color(QPalette::Window), palette.color(QPalette::WindowText), frameIntensityBias()));
+    const QColor &focus = focusColor(palette);
 
     if (mode == AnimationFocus) {
         outline = KColorUtils::mix(outline, focus, opacity);
@@ -686,8 +688,8 @@ void Helper::renderButtonFrame(QPainter *painter,
             bgBrush = alphaColor(highlightColor, 0.125);
             penBrush = KColorUtils::mix(highlightColor, KColorUtils::mix(palette.button().color(), palette.buttonText().color(), frameIntensityBias()), 0.5);
         } else {
-            bgBrush = alphaColor(highlightColor, 0);
-            penBrush = hasNeutralHighlight ? neutralText(palette) : bgBrush;
+            bgBrush = (hovered && enabled) ? hoverColor(palette) : alphaColor(highlightColor, 0);
+            penBrush = hasNeutralHighlight ? neutralText(palette) : KColorUtils::mix(palette.button().color(), palette.buttonText().color(), frameIntensityBias());
         }
     } else {
         if (down && enabled) {
@@ -707,20 +709,26 @@ void Helper::renderButtonFrame(QPainter *painter,
         }
     }
 
-    if ((hovered || visualFocus || down) && enabled) {
-        penBrush = highlightColor;
+    if (enabled) {
+        if (down) {
+            penBrush = highlightColor;
+        } else if (visualFocus) {
+            penBrush = focusOutlineColor(palette);
+        } else if (hovered) {
+            penBrush = hoverOutlineColor(palette);
+        }
     }
 
     // Animations
     if (bgAnimation != AnimationData::OpacityInvalid && enabled) {
         QColor color1 = bgBrush.color();
-        QColor color2 =
-            flat ? alphaColor(highlightColor, highlightBackgroundAlpha) : KColorUtils::mix(palette.button().color(), highlightColor, Metrics::Blend_Value);
+        QColor color2 = flat ? (down ? alphaColor(highlightColor, highlightBackgroundAlpha) : hoverColor(palette))
+                             : KColorUtils::mix(palette.button().color(), highlightColor, Metrics::Blend_Value);
         bgBrush = KColorUtils::mix(color1, color2, bgAnimation);
     }
     if (penAnimation != AnimationData::OpacityInvalid && enabled) {
         QColor color1 = penBrush.color();
-        QColor color2 = highlightColor;
+        QColor color2 = down ? highlightColor : (visualFocus ? focusOutlineColor(palette) : hoverOutlineColor(palette));
         penBrush = KColorUtils::mix(color1, color2, penAnimation);
     }
 
@@ -1290,11 +1298,38 @@ void Helper::renderScrollBarBorder(QPainter *painter, const QRectF &rect, const 
     }
 }
 
+namespace
+{
+void renderTabActiveIndicator(QPainter *painter, const QRectF &frameRect, bool north, bool south, bool west, bool east, const QColor &color)
+{
+    QRectF indicator = frameRect;
+    const qreal thickness = Metrics::TabBar_ActiveEffectSize;
+
+    if (north || south) {
+        indicator.setHeight(thickness);
+        if (north) {
+            indicator.moveBottom(frameRect.bottom());
+        } else {
+            indicator.moveTop(frameRect.top());
+        }
+    } else if (west || east) {
+        indicator.setWidth(thickness);
+        if (west) {
+            indicator.moveRight(frameRect.right());
+        } else {
+            indicator.moveLeft(frameRect.left());
+        }
+    }
+
+    painter->fillRect(indicator, color);
+}
+}
+
 void Helper::renderStaticTabBarTab(QPainter *painter,
                                    const QRectF &rect,
                                    const QPalette &palette,
                                    const QHash<QByteArray, bool> &stateProperties,
-                                   Corners corners,
+                                   Corners /*corners*/,
                                    qreal animation) const
 {
     bool enabled = stateProperties.value("enabled", true);
@@ -1306,13 +1341,12 @@ void Helper::renderStaticTabBarTab(QPainter *painter,
     bool west = stateProperties.value("west");
     bool east = stateProperties.value("east");
     bool isFirst = stateProperties.value("isFirst");
-    bool isLast = stateProperties.value("isLast");
     bool isRightOfSelected = stateProperties.value("isRightOfSelected");
     bool animated = animation != AnimationData::OpacityInvalid;
     bool isQtQuickControl = stateProperties.value("isQtQuickControl");
     bool hasAlteredBackground = stateProperties.value("hasAlteredBackground");
-    const auto baseColor = palette.color(QPalette::Base).darker(102);
     const auto windowColor = palette.color(QPalette::Window);
+    const auto separatorColor = KColorUtils::mix(windowColor, palette.color(QPalette::WindowText), 0.08);
 
     // setup painter
     painter->setRenderHint(QPainter::Antialiasing, true);
@@ -1320,53 +1354,15 @@ void Helper::renderStaticTabBarTab(QPainter *painter,
     QColor bgBrush;
 
     if (selected) {
-        // overlap border
-        bgBrush = windowColor;
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(bgBrush);
-        painter->drawRect(frameRect);
-
         if (documentMode && !isQtQuickControl && !hasAlteredBackground) {
-            const auto highlightBackground = alphaColor(palette.color(QPalette::Highlight), frameIntensityBias());
-            bgBrush = highlightBackground;
+            bgBrush = windowColor;
         } else {
             bgBrush = frameBackgroundColor(palette);
         }
-        QColor penBrush = KColorUtils::mix(bgBrush, palette.color(QPalette::WindowText), frameIntensityBias());
-        painter->setBrush(bgBrush);
-        painter->setPen(QPen(penBrush, PenWidth::Frame));
-        QRectF highlightRect = frameRect;
-        if (north || south) {
-            highlightRect.setHeight(Metrics::TabBar_ActiveEffectSize);
-        } else if (west || east) {
-            highlightRect.setWidth(Metrics::TabBar_ActiveEffectSize);
-        }
-        if (south) {
-            highlightRect.moveBottom(frameRect.bottom());
-        } else if (east) {
-            highlightRect.moveRight(frameRect.right());
-        }
-
-        auto rect = strokedRect(frameRect);
-        // don't stroke the first and last tab
-        if (isFirst) {
-            if (north || south) {
-                rect.adjust(-PenWidth::Frame, 0, 0, 0);
-            } else {
-                rect.adjust(0, -PenWidth::Frame, 0, 0);
-            }
-        }
-        if (isLast) {
-            if (north || south) {
-                rect.adjust(0, 0, PenWidth::Frame, 0);
-            } else {
-                rect.adjust(PenWidth::Frame, 0, 0, 0);
-            }
-        }
-        painter->drawRect(rect);
-        painter->setBrush(palette.color(QPalette::Highlight));
         painter->setPen(Qt::NoPen);
-        painter->drawRect(highlightRect);
+        painter->setBrush(bgBrush);
+        painter->drawRect(frameRect);
+        renderTabActiveIndicator(painter, frameRect, north, south, west, east, activeTextColor(palette));
     } else {
         // don't overlap border
         // Since we don't set the rectangle as strokedRect here, modify only one side of it
@@ -1374,13 +1370,8 @@ void Helper::renderStaticTabBarTab(QPainter *painter,
         const qreal overlap = PenWidth::Frame;
         frameRect.adjust(west ? overlap : 0, south || north ? overlap : 0, east ? -overlap : 0, south || north ? -overlap : 0);
 
-        if (hovered) {
-            bgBrush = windowColor;
-        } else {
-            bgBrush = baseColor;
-        }
-
-        const auto hover = alphaColor(hoverColor(palette), frameIntensityBias());
+        bgBrush = windowColor;
+        const auto hover = hoverColor(palette);
         if (animated) {
             bgBrush = KColorUtils::mix(bgBrush, hover, animation);
         } else if (enabled && hovered) {
@@ -1392,7 +1383,6 @@ void Helper::renderStaticTabBarTab(QPainter *painter,
     }
 
     if (!isRightOfSelected && !isFirst && (north || south)) {
-        auto penColor = KColorUtils::mix(baseColor, palette.color(QPalette::WindowText), frameIntensityBias());
         QRectF lineRect = frameRect;
         lineRect.setRight(lineRect.x() + 1);
         lineRect.adjust(0, 0, 0, -1);
@@ -1405,10 +1395,9 @@ void Helper::renderStaticTabBarTab(QPainter *painter,
         if (!isRightOfSelected && !selected) {
             lineRect.adjust(0, 8, 0, -7);
         }
-        painter->setBrush(penColor);
+        painter->setBrush(separatorColor);
         painter->drawRect(lineRect);
     } else if (!isRightOfSelected && !isFirst && (east || west)) {
-        auto penColor = KColorUtils::mix(baseColor, palette.color(QPalette::WindowText), frameIntensityBias());
         QRectF lineRect = frameRect;
         lineRect.setBottom(lineRect.y() - 1);
         lineRect.adjust(0, 0, -1, 0);
@@ -1421,7 +1410,7 @@ void Helper::renderStaticTabBarTab(QPainter *painter,
         if (!isRightOfSelected && !selected) {
             lineRect.adjust(0, 8, 0, -7);
         }
-        painter->setBrush(penColor);
+        painter->setBrush(separatorColor);
         painter->drawRect(lineRect);
     }
 }
@@ -1466,23 +1455,9 @@ void Helper::renderTabBarTab(QPainter *painter,
         QColor penBrush = KColorUtils::mix(bgBrush, palette.color(QPalette::WindowText), frameIntensityBias());
         painter->setBrush(bgBrush);
         painter->setPen(QPen(penBrush, PenWidth::Frame));
-        QRectF highlightRect = frameRect;
-        if (north || south) {
-            highlightRect.setHeight(Metrics::TabBar_ActiveEffectSize);
-        } else if (west || east) {
-            highlightRect.setWidth(Metrics::TabBar_ActiveEffectSize);
-        }
-        if (south) {
-            highlightRect.moveBottom(frameRect.bottom());
-        } else if (east) {
-            highlightRect.moveRight(frameRect.right());
-        }
         QPainterPath path = roundedPath(strokedRect(frameRect), corners, frameRadius(PenWidth::Frame));
         painter->drawPath(path);
-        QPainterPath highlightPath = roundedPath(highlightRect, corners, Metrics::Frame_FrameRadius);
-        painter->setBrush(palette.color(QPalette::Highlight));
-        painter->setPen(Qt::NoPen);
-        painter->drawPath(highlightPath);
+        renderTabActiveIndicator(painter, frameRect, north, south, west, east, activeTextColor(palette));
     } else {
         // don't overlap border
         // Since we don't set the rectangle as strokedRect here, modify only one side of it
@@ -1491,8 +1466,8 @@ void Helper::renderTabBarTab(QPainter *painter,
         frameRect.adjust(east ? overlap : 0, south ? overlap : 0, west ? -overlap : 0, north ? -overlap : 0);
 
         const auto windowColor = palette.color(QPalette::Window);
-        bgBrush = windowColor.darker(120);
-        const auto hover = alphaColor(hoverColor(palette), 0.2);
+        bgBrush = windowColor;
+        const auto hover = hoverColor(palette);
         if (animated) {
             bgBrush = KColorUtils::mix(bgBrush, hover, animation);
         } else if (enabled && hovered && !selected) {

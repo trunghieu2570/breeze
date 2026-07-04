@@ -4858,7 +4858,7 @@ bool Style::drawPanelItemViewItemPrimitive(const QStyleOption *option, QPainter 
     // change color to implement mouse over
     if (mouseOver && !hasCustomBackground) {
         if (!selected) {
-            color.setAlphaF(Metrics::Blend_Value);
+            color = _helper->hoverColor(palette);
         } else {
             color = color.lighter(Metrics::Focus_LightenColorValue);
         }
@@ -7057,27 +7057,24 @@ bool Style::drawTabBarTabLabelControl(const QStyleOption *option, QPainter *pain
             painter->drawPixmap(iconRect.x(), iconRect.y(), tabIcon);
         }
 
+        QPalette textPalette = tab->palette;
+        const bool selected = tab->state & State_Selected;
+        const bool enabled = tab->state & State_Enabled;
+        if (enabled) {
+            textPalette.setColor(QPalette::Active,
+                                 QPalette::WindowText,
+                                 selected ? textPalette.color(QPalette::Active, QPalette::WindowText)
+                                          : _helper->inactiveTextColor(textPalette));
+        }
+
         proxy()->drawItemText(painter,
                               tr,
                               alignment,
-                              tab->palette,
-                              tab->state & State_Enabled,
+                              textPalette,
+                              enabled,
                               tab->text,
-                              widget ? widget->foregroundRole() : QPalette::WindowText);
+                              QPalette::WindowText);
         pss.restore();
-
-        if (tab->state & State_HasFocus) {
-            const int OFFSET = 1 + pixelMetric(PM_DefaultFrameWidth, option, widget);
-
-            int x1, x2;
-            x1 = tab->rect.left();
-            x2 = tab->rect.right() - 1;
-
-            QStyleOptionFocusRect fropt;
-            fropt.QStyleOption::operator=(*tab);
-            fropt.rect.setRect(x1 + 1 + OFFSET, tab->rect.y() + OFFSET, x2 - x1 - 2 * OFFSET, tab->rect.height() - 2 * OFFSET);
-            drawPrimitive(PE_FrameFocusRect, &fropt, painter, widget);
-        }
     }
     // SPDX-SnippetEnd
 

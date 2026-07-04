@@ -128,15 +128,15 @@ struct Metrics {
     static constexpr int Slider_ControlThickness = 20;
 
     // tabbar
-    static constexpr int TabBar_TabMarginHeight = 4;
-    static constexpr int TabBar_TabMarginWidth = 8;
+    static constexpr int TabBar_TabMarginHeight = 5;
+    static constexpr int TabBar_TabMarginWidth = 10;
     static constexpr int TabBar_TabMinWidth = 80;
-    static constexpr int TabBar_TabMinHeight = 30;
+    static constexpr int TabBar_TabMinHeight = 32;
     static constexpr int TabBar_StaticTabMinHeight = 34;
     static constexpr int TabBar_TabItemSpacing = 8;
     static constexpr int TabBar_TabOverlap = 1;
     static constexpr int TabBar_BaseOverlap = 2;
-    static constexpr int TabBar_ActiveEffectSize = 3;
+    static constexpr int TabBar_ActiveEffectSize = 2;
 
     // tab widget
     static constexpr int TabWidget_MarginWidth = 3;
