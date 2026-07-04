@@ -38,10 +38,6 @@
     <entry name="OutlineEnabled" type = "Bool">
       <default>true</default>
     </entry>
-
-    <entry name="RoundedCorners" type = "Bool">
-      <default>true</default>
-    </entry>
   </group>
 
   <group name="Windeco">

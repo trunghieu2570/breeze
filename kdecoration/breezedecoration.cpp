@@ -435,26 +435,7 @@ void Decoration::recalculateBorders()
 
     setResizeOnlyBorders(QMarginsF(extSides, 0, extSides, extBottom));
 
-    qreal topLeftRightRadius = 0;
-    qreal bottomLeftRadius = 0;
-    qreal bottomRightRadius = 0;
-    if (m_internalSettings->roundedCorners()) {
-        if (hideTitleBar()) {
-            topLeftRightRadius = m_scaledCornerRadius;
-        }
-
-        if (hasNoBorders()) {
-            if (!isBottomEdge()) {
-                if (!isLeftEdge()) {
-                    bottomLeftRadius = m_scaledCornerRadius;
-                }
-                if (!isRightEdge()) {
-                    bottomRightRadius = m_scaledCornerRadius;
-                }
-            }
-        }
-    }
-    setBorderRadius(KDecoration3::BorderRadius(topLeftRightRadius, topLeftRightRadius, bottomRightRadius, bottomLeftRadius));
+    setBorderRadius(KDecoration3::BorderRadius());
 
     if (isMaximized() || !outlinesEnabled()) {
         setBorderOutline(KDecoration3::BorderOutline());
@@ -464,18 +445,9 @@ void Decoration::recalculateBorders()
                                             KColorScheme::frameContrast());
         const qreal thickness = std::max(KDecoration3::pixelSize(window()->nextScale()), KDecoration3::snapToPixelGrid(1, window()->nextScale()));
 
-        qreal topLeftRightRadius = 0;
-        qreal bottomLeftRadius = 0;
-        qreal bottomRightRadius = 0;
-        if (!hideTitleBar() || m_internalSettings->roundedCorners()) {
-            topLeftRightRadius = m_scaledCornerRadius;
-        }
-        if (!hasNoBorders() || m_internalSettings->roundedCorners()) {
-            bottomLeftRadius = m_scaledCornerRadius;
-            bottomRightRadius = m_scaledCornerRadius;
-        }
-
-        const auto radius = KDecoration3::BorderRadius(topLeftRightRadius, topLeftRightRadius, bottomRightRadius, bottomLeftRadius);
+        const qreal topLeftRightRadius = hideTitleBar() ? 0 : m_scaledCornerRadius;
+        const qreal bottomRadius = hasNoBorders() ? 0 : m_scaledCornerRadius;
+        const auto radius = KDecoration3::BorderRadius(topLeftRightRadius, topLeftRightRadius, bottomRadius, bottomRadius);
         setBorderOutline(KDecoration3::BorderOutline(thickness, color, radius));
     }
 }
