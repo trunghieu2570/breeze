@@ -41,11 +41,13 @@ void MdiWindowShadow::updateGeometry()
         return;
     }
 
-    const QSizeF boxSize =
-        BoxShadowRenderer::calculateMinimumBoxSize(params.shadow1.radius).expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow2.radius));
+    const QSizeF boxSize = BoxShadowRenderer::calculateMinimumBoxSize(params.shadow1.radius)
+                               .expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow2.radius))
+                               .expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow3.radius));
 
     const QSizeF shadowSize = BoxShadowRenderer::calculateMinimumShadowTextureSize(boxSize, params.shadow1.radius, params.shadow1.offset)
-                                  .expandedTo(BoxShadowRenderer::calculateMinimumShadowTextureSize(boxSize, params.shadow2.radius, params.shadow2.offset));
+                                  .expandedTo(BoxShadowRenderer::calculateMinimumShadowTextureSize(boxSize, params.shadow2.radius, params.shadow2.offset))
+                                  .expandedTo(BoxShadowRenderer::calculateMinimumShadowTextureSize(boxSize, params.shadow3.radius, params.shadow3.offset));
 
     const QRectF shadowRect(QPoint(0, 0), shadowSize);
 

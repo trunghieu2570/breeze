@@ -61,34 +61,38 @@ struct ShadowParams {
 struct CompositeShadowParams {
     CompositeShadowParams() = default;
 
-    CompositeShadowParams(const QPoint &offset, const ShadowParams &shadow1, const ShadowParams &shadow2)
+    CompositeShadowParams(const QPoint &offset, const ShadowParams &shadow1, const ShadowParams &shadow2, const ShadowParams &shadow3 = ShadowParams())
         : offset(offset)
         , shadow1(shadow1)
         , shadow2(shadow2)
+        , shadow3(shadow3)
     {
     }
 
     bool isNone() const
     {
-        return qMax(shadow1.radius, shadow2.radius) == 0;
+        return qMax(qMax(shadow1.radius, shadow2.radius), shadow3.radius) == 0;
     }
 
     QPoint offset;
     ShadowParams shadow1;
     ShadowParams shadow2;
+    ShadowParams shadow3;
 };
+
+static constexpr float InactiveShadowScale = 0.65f;
 
 const CompositeShadowParams s_shadowParams[] = {
     // None
     CompositeShadowParams(),
     // Small
-    CompositeShadowParams(QPoint(0, 4), ShadowParams(QPoint(0, 0), 16, 1), ShadowParams(QPoint(0, -2), 8, 0.4)),
+    CompositeShadowParams(QPoint(0, 2), ShadowParams(QPoint(0, 0), 24, 0.10), ShadowParams(QPoint(0, 0), 12, 0.06), ShadowParams(QPoint(0, 0), 4, 0.04)),
     // Medium
-    CompositeShadowParams(QPoint(0, 8), ShadowParams(QPoint(0, 0), 32, 0.9), ShadowParams(QPoint(0, -4), 16, 0.3)),
+    CompositeShadowParams(QPoint(0, 3), ShadowParams(QPoint(0, 0), 36, 0.12), ShadowParams(QPoint(0, 0), 18, 0.07), ShadowParams(QPoint(0, 0), 6, 0.05)),
     // Large
-    CompositeShadowParams(QPoint(0, 12), ShadowParams(QPoint(0, 0), 48, 0.8), ShadowParams(QPoint(0, -6), 24, 0.2)),
+    CompositeShadowParams(QPoint(0, 4), ShadowParams(QPoint(0, 0), 48, 0.14), ShadowParams(QPoint(0, 0), 24, 0.08), ShadowParams(QPoint(0, 0), 8, 0.05)),
     // Very large
-    CompositeShadowParams(QPoint(0, 16), ShadowParams(QPoint(0, 0), 64, 0.7), ShadowParams(QPoint(0, -8), 32, 0.1)),
+    CompositeShadowParams(QPoint(0, 5), ShadowParams(QPoint(0, 0), 64, 0.16), ShadowParams(QPoint(0, 0), 32, 0.09), ShadowParams(QPoint(0, 0), 10, 0.06)),
 };
 
 inline CompositeShadowParams lookupShadowParams(int size)
@@ -740,7 +744,7 @@ void Decoration::updateShadow()
 
     // Animated case, no cached shadow object
     if ((m_shadowAnimation->state() == QAbstractAnimation::Running) && (m_shadowOpacity != 0.0) && (m_shadowOpacity != 1.0)) {
-        setShadow(createShadowObject(0.5 + m_shadowOpacity * 0.5));
+        setShadow(createShadowObject(InactiveShadowScale + m_shadowOpacity * (1.0f - InactiveShadowScale)));
         return;
     }
 
@@ -756,7 +760,7 @@ void Decoration::updateShadow()
     auto &shadow = (window()->isActive()) ? g_sShadow : g_sShadowInactive;
     if (!shadow) {
         g_sShadow = createShadowObject(1.0);
-        g_sShadowInactive = createShadowObject(0.5);
+        g_sShadowInactive = createShadowObject(InactiveShadowScale);
     }
     setShadow(shadow);
 }
@@ -776,8 +780,9 @@ std::shared_ptr<KDecoration3::DecorationShadow> Decoration::createShadowObject(c
         return c;
     };
 
-    const QSize boxSize =
-        BoxShadowRenderer::calculateMinimumBoxSize(params.shadow1.radius).expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow2.radius));
+    const QSize boxSize = BoxShadowRenderer::calculateMinimumBoxSize(params.shadow1.radius)
+                              .expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow2.radius))
+                              .expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow3.radius));
 
     BoxShadowRenderer shadowRenderer;
     shadowRenderer.setBorderRadius(m_scaledCornerRadius + 0.5);
@@ -786,6 +791,9 @@ std::shared_ptr<KDecoration3::DecorationShadow> Decoration::createShadowObject(c
     const qreal strength = m_internalSettings->shadowStrength() / 255.0 * strengthScale;
     shadowRenderer.addShadow(params.shadow1.offset, params.shadow1.radius, withOpacity(m_internalSettings->shadowColor(), params.shadow1.opacity * strength));
     shadowRenderer.addShadow(params.shadow2.offset, params.shadow2.radius, withOpacity(m_internalSettings->shadowColor(), params.shadow2.opacity * strength));
+    if (params.shadow3.radius > 0) {
+        shadowRenderer.addShadow(params.shadow3.offset, params.shadow3.radius, withOpacity(m_internalSettings->shadowColor(), params.shadow3.opacity * strength));
+    }
 
     QImage shadowTexture = shadowRenderer.render();
 

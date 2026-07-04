@@ -45,27 +45,30 @@ struct ShadowParams {
 struct CompositeShadowParams {
     CompositeShadowParams() = default;
 
-    CompositeShadowParams(const QPoint &offset, const ShadowParams &shadow1, const ShadowParams &shadow2)
+    CompositeShadowParams(const QPoint &offset, const ShadowParams &shadow1, const ShadowParams &shadow2, const ShadowParams &shadow3 = ShadowParams())
         : offset(offset)
         , shadow1(shadow1)
         , shadow2(shadow2)
+        , shadow3(shadow3)
     {
     }
 
     bool isNone() const
     {
-        return qMax(shadow1.radius, shadow2.radius) == 0;
+        return qMax(qMax(shadow1.radius, shadow2.radius), shadow3.radius) == 0;
     }
 
     QPoint offset;
     ShadowParams shadow1;
     ShadowParams shadow2;
+    ShadowParams shadow3;
 
     void operator*=(qreal factor)
     {
         offset *= factor;
         shadow1 *= factor;
         shadow2 *= factor;
+        shadow3 *= factor;
     }
 };
 

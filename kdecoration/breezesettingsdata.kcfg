@@ -10,7 +10,7 @@
 
     <entry name="ShadowStrength" type = "Int">
        <default>255</default>
-       <min>25</min>
+       <min>10</min>
        <max>255</max>
     </entry>
 

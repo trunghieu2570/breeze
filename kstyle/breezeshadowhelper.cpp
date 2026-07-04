@@ -34,13 +34,13 @@ const CompositeShadowParams s_shadowParams[] = {
     // None
     CompositeShadowParams(),
     // Small
-    CompositeShadowParams(QPoint(0, 3), ShadowParams(QPoint(0, 0), 12, 0.26), ShadowParams(QPoint(0, -2), 6, 0.16)),
+    CompositeShadowParams(QPoint(0, 2), ShadowParams(QPoint(0, 0), 14, 0.10), ShadowParams(QPoint(0, 0), 7, 0.06), ShadowParams(QPoint(0, 0), 2, 0.04)),
     // Medium
-    CompositeShadowParams(QPoint(0, 4), ShadowParams(QPoint(0, 0), 16, 0.24), ShadowParams(QPoint(0, -2), 8, 0.14)),
+    CompositeShadowParams(QPoint(0, 3), ShadowParams(QPoint(0, 0), 22, 0.12), ShadowParams(QPoint(0, 0), 11, 0.07), ShadowParams(QPoint(0, 0), 4, 0.05)),
     // Large
-    CompositeShadowParams(QPoint(0, 5), ShadowParams(QPoint(0, 0), 20, 0.22), ShadowParams(QPoint(0, -3), 10, 0.12)),
+    CompositeShadowParams(QPoint(0, 3), ShadowParams(QPoint(0, 0), 28, 0.14), ShadowParams(QPoint(0, 0), 14, 0.08), ShadowParams(QPoint(0, 0), 5, 0.05)),
     // Very Large
-    CompositeShadowParams(QPoint(0, 6), ShadowParams(QPoint(0, 0), 24, 0.2), ShadowParams(QPoint(0, -3), 12, 0.1))};
+    CompositeShadowParams(QPoint(0, 4), ShadowParams(QPoint(0, 0), 38, 0.16), ShadowParams(QPoint(0, 0), 19, 0.09), ShadowParams(QPoint(0, 0), 6, 0.06))};
 }
 
 namespace Breeze
@@ -199,8 +199,9 @@ TileSet ShadowHelper::shadowTiles(QWidget *widget)
     const QColor color = StyleConfigData::shadowColor();
     const qreal strength = static_cast<qreal>(StyleConfigData::shadowStrength()) / 255.0;
 
-    const QSize boxSize =
-        BoxShadowRenderer::calculateMinimumBoxSize(params.shadow1.radius).expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow2.radius));
+    const QSize boxSize = BoxShadowRenderer::calculateMinimumBoxSize(params.shadow1.radius)
+                              .expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow2.radius))
+                              .expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow3.radius));
 
     const qreal frameRadius = _helper->frameRadius();
 
@@ -210,6 +211,9 @@ TileSet ShadowHelper::shadowTiles(QWidget *widget)
 
     shadowRenderer.addShadow(params.shadow1.offset, params.shadow1.radius, withOpacity(color, params.shadow1.opacity * strength));
     shadowRenderer.addShadow(params.shadow2.offset, params.shadow2.radius, withOpacity(color, params.shadow2.opacity * strength));
+    if (params.shadow3.radius > 0) {
+        shadowRenderer.addShadow(params.shadow3.offset, params.shadow3.radius, withOpacity(color, params.shadow3.opacity * strength));
+    }
 
     QImage shadowTexture = shadowRenderer.render();
 
@@ -411,11 +415,13 @@ QMargins ShadowHelper::shadowMargins(QWidget *widget) const
     qreal dpr = devicePixelRatio(widget);
     params *= dpr;
 
-    const QSize boxSize =
-        BoxShadowRenderer::calculateMinimumBoxSize(params.shadow1.radius).expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow2.radius));
+    const QSize boxSize = BoxShadowRenderer::calculateMinimumBoxSize(params.shadow1.radius)
+                              .expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow2.radius))
+                              .expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow3.radius));
 
     const QSizeF shadowSize = BoxShadowRenderer::calculateMinimumShadowTextureSize(boxSize, params.shadow1.radius, params.shadow1.offset)
-                                  .expandedTo(BoxShadowRenderer::calculateMinimumShadowTextureSize(boxSize, params.shadow2.radius, params.shadow2.offset));
+                                  .expandedTo(BoxShadowRenderer::calculateMinimumShadowTextureSize(boxSize, params.shadow2.radius, params.shadow2.offset))
+                                  .expandedTo(BoxShadowRenderer::calculateMinimumShadowTextureSize(boxSize, params.shadow3.radius, params.shadow3.offset));
 
     const QRectF shadowRect(QPoint(0, 0), shadowSize);
 
