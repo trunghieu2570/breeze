@@ -1085,14 +1085,12 @@ void Helper::renderSliderGroove(QPainter *painter, const QRectF &rect, const QCo
 
     QRectF baseRect(rect);
     baseRect.adjust(0.5, 0.5, -0.5, -0.5);
-    const qreal radius(0.5 * Metrics::Slider_GrooveThickness);
 
-    // content
     // content
     if (fg.isValid()) {
         painter->setPen(QPen(transparentize(fg, frameIntensityBias()), PenWidth::Frame));
         painter->setBrush(KColorUtils::overlayColors(bg, alphaColor(fg, 0.7)));
-        painter->drawRoundedRect(baseRect, radius, radius);
+        painter->drawRect(baseRect);
     }
 }
 
@@ -1208,13 +1206,12 @@ void Helper::renderProgressBarGroove(QPainter *painter, const QRectF &rect, cons
 
     QRectF baseRect(rect);
     baseRect.adjust(0.5, 0.5, -0.5, -0.5);
-    const qreal radius(0.5 * Metrics::ProgressBar_Thickness);
 
     // content
     if (fg.isValid()) {
         painter->setPen(QPen(transparentize(fg, frameIntensityBias()), PenWidth::Frame));
         painter->setBrush(KColorUtils::overlayColors(bg, alphaColor(fg, 0.7)));
-        painter->drawRoundedRect(baseRect, radius, radius);
+        painter->drawRect(baseRect);
     }
 }
 
@@ -1231,7 +1228,6 @@ void Helper::renderProgressBarBusyContents(QPainter *painter,
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     const QRectF baseRect(rect);
-    const qreal radius(0.5 * Metrics::ProgressBar_Thickness);
 
     // setup brush
     QPixmap pixmap(horizontal ? 2 * Metrics::ProgressBar_BusyIndicatorSize : 1, horizontal ? 1 : 2 * Metrics::ProgressBar_BusyIndicatorSize);
@@ -1267,7 +1263,7 @@ void Helper::renderProgressBarBusyContents(QPainter *painter,
 
     painter->setPen(Qt::NoPen);
     painter->setBrush(pixmap);
-    painter->drawRoundedRect(baseRect, radius, radius);
+    painter->drawRect(baseRect);
 }
 
 //______________________________________________________________________________
