@@ -278,12 +278,13 @@ QColor Helper::sliderOutlineColor(const QPalette &palette, bool mouseOver, bool 
 //____________________________________________________________________
 QColor Helper::scrollBarHandleColor(const QPalette &palette, bool mouseOver, bool hasFocus, qreal opacity, AnimationMode mode) const
 {
-    QColor color(alphaColor(palette.color(QPalette::WindowText), 0.5));
+    const QColor accent = palette.color(QPalette::Highlight);
+    QColor color(alphaColor(accent, 0.4));
 
     // hover takes precedence over focus
     if (mode == AnimationHover) {
-        const QColor hover(hoverColor(palette));
-        const QColor focus(focusColor(palette));
+        const QColor hover = alphaColor(accent, 0.75);
+        const QColor focus = accent;
         if (hasFocus) {
             color = KColorUtils::mix(focus, hover, opacity);
         } else {
@@ -291,14 +292,13 @@ QColor Helper::scrollBarHandleColor(const QPalette &palette, bool mouseOver, boo
         }
 
     } else if (mouseOver) {
-        color = hoverColor(palette);
+        color = alphaColor(accent, 0.75);
 
     } else if (mode == AnimationFocus) {
-        const QColor focus(focusColor(palette));
-        color = KColorUtils::mix(color, focus, opacity);
+        color = KColorUtils::mix(color, accent, opacity);
 
     } else if (hasFocus) {
-        color = focusColor(palette);
+        color = accent;
     }
 
     return color;
